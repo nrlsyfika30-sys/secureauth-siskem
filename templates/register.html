@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureAuth — Daftar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f7ff; --surface: #ffffff; --surface2: #e8f3ff;
+            --border: #bfdbfe; --accent: #2563eb; --accent-light: #60a5fa;
+            --accent-dark: #1d4ed8; --accent-soft: #dbeafe;
+            --text: #1e3a5f; --text-dim: #64748b;
+            --danger: #ef4444; --success: #10b981;
+            --shadow: 0 8px 40px rgba(37,99,235,0.10);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        body::before { content: ''; position: fixed; top: -180px; left: -180px; width: 560px; height: 560px; background: radial-gradient(circle, rgba(37,99,235,0.07), transparent 70%); border-radius: 50%; pointer-events: none; }
+        body::after { content: ''; position: fixed; bottom: -140px; right: -140px; width: 460px; height: 460px; background: radial-gradient(circle, rgba(96,165,250,0.09), transparent 70%); border-radius: 50%; pointer-events: none; }
+        .container { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+        .brand { text-align: center; margin-bottom: 1.75rem; animation: fadeDown 0.5s ease; }
+        .brand-icon { width: 70px; height: 70px; margin: 0 auto 1rem; background: linear-gradient(135deg, #60a5fa, #2563eb); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 10px 30px rgba(37,99,235,0.28); }
+        .brand h1 { font-family: 'Lora', serif; font-size: 1.9rem; color: var(--accent-dark); }
+        .brand p { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.3rem; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 2.25rem; box-shadow: var(--shadow); animation: fadeUp 0.5s ease; }
+        .card-title { font-family: 'Lora', serif; font-size: 1.2rem; color: var(--text); margin-bottom: 1.6rem; }
+        .form-group { margin-bottom: 1.1rem; }
+        label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-dim); margin-bottom: 0.45rem; }
+        input[type="text"], input[type="password"] { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 11px; color: var(--text); padding: 0.78rem 1rem; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus { border-color: var(--accent-light); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); background: #fff; }
+        input::placeholder { color: var(--text-dim); opacity: 0.55; }
+        input.valid { border-color: var(--success); }
+        input.invalid { border-color: var(--danger); }
+        .strength-bar { display: flex; gap: 4px; margin-top: 7px; }
+        .strength-seg { height: 4px; flex: 1; border-radius: 99px; background: var(--border); transition: background 0.3s; }
+        .strength-label { font-size: 0.7rem; font-weight: 600; margin-top: 4px; }
+        .requirements { margin-top: 0.65rem; display: flex; flex-direction: column; gap: 3px; }
+        .req { font-size: 0.73rem; color: var(--text-dim); display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+        .req.met { color: var(--success); }
+        .btn-primary { width: 100%; padding: 0.87rem; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border: none; border-radius: 11px; font-size: 0.92rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; margin-top: 0.75rem; box-shadow: 0 4px 18px rgba(37,99,235,0.28); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,99,235,0.38); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .alert { padding: 0.78rem 1rem; border-radius: 10px; font-size: 0.83rem; margin-bottom: 1rem; display: none; font-weight: 500; line-height: 1.5; }
+        .alert.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--danger); display: block; }
+        .alert.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: var(--success); display: block; }
+        .debug-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem; margin-top: 1rem; display: none; }
+        .debug-panel.show { display: block; }
+        .debug-title { font-size: 0.68rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .debug-row { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); padding: 0.22rem 0; border-bottom: 1px solid var(--border); }
+        .debug-row:last-child { border-bottom: none; }
+        .debug-val { color: var(--text); max-width: 60%; text-align: right; word-break: break-all; }
+        .footer-link { text-align: center; margin-top: 1.35rem; font-size: 0.83rem; color: var(--text-dim); }
+        .footer-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .footer-link a:hover { text-decoration: underline; }
+        .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="brand">
+            <div class="brand-icon">🛡️</div>
+            <h1>SecureAuth</h1>
+            <p>Sistem Autentikasi Aman</p>
+        </div>
+        <div class="card">
+            <div class="card-title">Buat Akun Baru</div>
+            <div id="alert" class="alert"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" placeholder="Minimal 3 karakter" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
+                    <div class="strength-bar">
+                        <div class="strength-seg" id="s1"></div><div class="strength-seg" id="s2"></div>
+                        <div class="strength-seg" id="s3"></div><div class="strength-seg" id="s4"></div>
+                    </div>
+                    <div class="strength-label" id="strengthLabel"></div>
+                    <div class="requirements">
+                        <div class="req" id="req-len"><span>○</span> Minimal 8 karakter</div>
+                        <div class="req" id="req-upper"><span>○</span> Huruf besar (A-Z)</div>
+                        <div class="req" id="req-lower"><span>○</span> Huruf kecil (a-z)</div>
+                        <div class="req" id="req-digit"><span>○</span> Angka (0-9)</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Konfirmasi Password</label>
+                    <input type="password" id="confirm" placeholder="Ulangi password" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn-primary" id="registerBtn" disabled>Buat Akun</button>
+            </form>
+            <div class="debug-panel" id="debugPanel">
+                <div class="debug-title">Info Bcrypt Hashing</div>
+                <div id="debugContent"></div>
+            </div>
+        </div>
+        <div class="footer-link">Sudah punya akun? <a href="/login">Masuk di sini</a></div>
+    </div>
+    <script>
+        const password = document.getElementById('password');
+        const confirm = document.getElementById('confirm');
+        const btn = document.getElementById('registerBtn');
+        const checks = { len: p => p.length >= 8, upper: p => /[A-Z]/.test(p), lower: p => /[a-z]/.test(p), digit: p => /[0-9]/.test(p) };
+        const colors = ['#ef4444','#f59e0b','#3b82f6','#10b981'];
+        const labels = ['','Lemah','Sedang','Kuat','Sangat Kuat'];
+        function updateStrength(p) {
+            const met = Object.values(checks).filter(fn => fn(p)).length;
+            ['s1','s2','s3','s4'].forEach((id,i) => document.getElementById(id).style.background = i < met ? colors[met-1] : 'var(--border)');
+            const lbl = document.getElementById('strengthLabel');
+            lbl.textContent = p.length > 0 ? labels[met] : '';
+            lbl.style.color = p.length > 0 ? colors[Math.max(0,met-1)] : 'var(--text-dim)';
+            Object.entries(checks).forEach(([key,fn]) => {
+                const el = document.getElementById(`req-${key}`);
+                el.classList.toggle('met', fn(p));
+                el.querySelector('span').textContent = fn(p) ? '✓' : '○';
+            });
+        }
+        function validateForm() {
+            const p = password.value, c = confirm.value;
+            const met = Object.values(checks).filter(fn => fn(p)).length;
+            confirm.className = c.length > 0 ? (p === c ? 'valid' : 'invalid') : '';
+            btn.disabled = !(met === 4 && p === c && c.length > 0);
+        }
+        password.addEventListener('input', () => { updateStrength(password.value); validateForm(); });
+        confirm.addEventListener('input', validateForm);
+        function showAlert(msg, type) { const el = document.getElementById('alert'); el.className = `alert ${type}`; el.textContent = msg; }
+        function showDebug(data) {
+            document.getElementById('debugPanel').classList.add('show');
+            document.getElementById('debugContent').innerHTML = Object.entries(data)
+                .map(([k,v]) => `<div class="debug-row"><span>${k}</span><span class="debug-val">${v}</span></div>`).join('');
+        }
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnEl = document.getElementById('registerBtn');
+            btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner"></span>Membuat akun...';
+            try {
+                const res = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ username: document.getElementById('username').value, password: password.value }) });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('✓ ' + data.message, 'success');
+                    if (data.debug) showDebug({ 'Algoritma': data.debug.hash_algorithm, 'Cost factor': `${data.debug.cost_factor} → ${Math.pow(2,data.debug.cost_factor)} iterasi`, 'Waktu hashing': `${data.debug.hash_time_seconds}s`, 'Hash': data.debug.hash_preview });
+                    setTimeout(() => window.location.href = '/login', 2500);
+                } else { showAlert(data.message, 'error'); btnEl.disabled = false; btnEl.innerHTML = 'Buat Akun'; }
+            } catch(e) { showAlert('Terjadi kesalahan koneksi.', 'error'); btnEl.disabled = false; btnEl.innerHTML = 'Buat Akun'; }
+        });
+    </script>
+</body>
+</html>
