@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureAuth — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f7ff;
+            --surface: #ffffff;
+            --surface2: #e8f3ff;
+            --border: #bfdbfe;
+            --accent: #2563eb;
+            --accent-light: #60a5fa;
+            --accent-dark: #1d4ed8;
+            --accent-soft: #dbeafe;
+            --purple: #7c3aed;
+            --purple-soft: #ede9fe;
+            --green: #059669;
+            --green-soft: #d1fae5;
+            --text: #1e3a5f;
+            --text-dim: #64748b;
+            --shadow: 0 4px 20px rgba(37,99,235,0.08);
+            --shadow-md: 0 8px 36px rgba(37,99,235,0.11);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        body::before { content: ''; position: fixed; top: -180px; right: -180px; width: 580px; height: 580px; background: radial-gradient(circle, rgba(37,99,235,0.07), transparent 70%); border-radius: 50%; pointer-events: none; z-index: 0; }
+
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+            box-shadow: 0 2px 16px rgba(37,99,235,0.07);
+        }
+        .nav-brand { font-family: 'Lora', serif; font-size: 1.25rem; color: var(--accent-dark); display: flex; align-items: center; gap: 0.5rem; }
+        .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+        .user-pill { font-size: 0.83rem; font-weight: 500; color: var(--text-dim); background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 0.4rem 1rem; }
+        .user-pill span { color: var(--accent-dark); font-weight: 700; }
+        .btn-logout { font-size: 0.83rem; font-weight: 600; font-family: 'Inter', sans-serif; border-radius: 9px; padding: 0.4rem 1rem; cursor: pointer; transition: all 0.2s; border: 1.5px solid #fecaca; background: #fef2f2; color: #dc2626; }
+        .btn-logout:hover { background: #dc2626; color: white; border-color: #dc2626; }
+
+        main { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .page-header { margin-bottom: 1.75rem; }
+        .page-header h2 { font-family: 'Lora', serif; font-size: 1.5rem; color: var(--text); }
+        .page-header p { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.3rem; }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.25rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.25rem; }
+        @media(max-width:768px){ .grid-3,.grid-2{ grid-template-columns:1fr; } }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.35rem 1.5rem; box-shadow: var(--shadow); }
+        .card-icon { font-size: 1.7rem; margin-bottom: 0.5rem; }
+        .card-label { font-size: 0.72rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem; }
+        .card-value { font-family: 'Lora', serif; font-size: 1.1rem; }
+        .card-value.blue { color: var(--accent-dark); }
+        .card-value.purple { color: var(--purple); }
+        .card-value.green { color: var(--green); }
+        .card-sub { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+        .token-card { margin-bottom: 1.25rem; }
+        .token-display { font-family: 'Courier New', monospace; font-size: 0.73rem; color: var(--purple); word-break: break-all; line-height: 1.9; background: var(--purple-soft); padding: 0.9rem 1rem; border-radius: 11px; border: 1px solid #ddd6fe; margin-top: 0.5rem; }
+
+        .section-title { font-family: 'Lora', serif; font-size: 1.05rem; color: var(--text); margin: 1.75rem 0 1rem; display: flex; align-items: center; gap: 0.75rem; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .demo-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .demo-input { flex: 1; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 11px; color: var(--text); padding: 0.65rem 0.95rem; font-size: 0.875rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+        .demo-input:focus { border-color: var(--accent-light); background: #fff; }
+        .demo-input::placeholder { color: var(--text-dim); opacity: 0.55; }
+
+        .btn-demo { padding: 0.65rem 1.15rem; border: none; border-radius: 11px; font-family: 'Inter', sans-serif; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .btn-sha { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.28); }
+        .btn-sha:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.36); }
+        .btn-bcrypt { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; box-shadow: 0 4px 14px rgba(124,58,237,0.28); }
+        .btn-bcrypt:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.36); }
+
+        .hash-result { background: var(--surface2); border: 1px solid var(--border); border-radius: 11px; padding: 1rem; min-height: 58px; }
+        .hash-hex { font-family: 'Courier New', monospace; font-size: 0.75rem; word-break: break-all; line-height: 1.9; color: var(--accent); }
+        .hash-hex.purple { color: var(--purple); }
+        .hash-hex.loading { color: var(--text-dim); animation: pulse 1s ease-in-out infinite; }
+        .hash-placeholder { color: var(--text-dim); font-size: 0.82rem; font-style: italic; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        .steps { margin-top: 0.9rem; display: flex; flex-direction: column; }
+        .step { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.79rem; color: var(--text-dim); padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+        .step:last-child { border-bottom: none; }
+        .step-num { width: 23px; height: 23px; border-radius: 50%; background: var(--accent-soft); border: 1.5px solid var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent-dark); flex-shrink: 0; margin-top: 1px; }
+        .step-num.purple { background: var(--purple-soft); border-color: #c4b5fd; color: var(--purple); }
+        .step-label { font-weight: 600; color: var(--text); font-size: 0.76rem; }
+
+        .slider-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .slider-label { font-size: 0.79rem; font-weight: 600; color: var(--text-dim); white-space: nowrap; }
+        input[type="range"] { flex: 1; accent-color: var(--purple); }
+        .slider-val { font-size: 0.81rem; font-weight: 700; color: var(--purple); min-width: 85px; text-align: right; }
+
+        .status-list { display: flex; flex-direction: column; gap: 0.55rem; }
+        .status-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.83rem; padding: 0.68rem 1rem; background: var(--surface2); border-radius: 11px; border: 1px solid var(--border); }
+        .status-item span:first-child { color: var(--text-dim); font-weight: 500; }
+        .badge { font-size: 0.7rem; font-weight: 700; padding: 0.24rem 0.7rem; border-radius: 7px; }
+        .badge-blue { background: var(--accent-soft); color: var(--accent-dark); }
+        .badge-purple { background: var(--purple-soft); color: var(--purple); }
+        .badge-green { background: var(--green-soft); color: var(--green); }
+        .badge-gray { background: #f1f5f9; color: var(--text-dim); border: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">🔐 SecureAuth</div>
+        <div class="nav-right">
+            <div class="user-pill">Halo, <span>{{ username }}</span></div>
+            <button class="btn-logout" onclick="logout()">Keluar</button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h2>Dashboard Keamanan</h2>
+            <p>Sistem autentikasi aktif menggunakan Bcrypt dan SHA-256 yang diimplementasi secara manual.</p>
+        </div>
+
+        <div class="grid-3">
+            <div class="card">
+                <div class="card-icon">✅</div>
+                <div class="card-label">Status Login</div>
+                <div class="card-value green">Terautentikasi</div>
+                <div class="card-sub">Pengguna aktif: <strong>{{ username }}</strong></div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔑</div>
+                <div class="card-label">Algoritma Password</div>
+                <div class="card-value blue">Bcrypt Manual</div>
+                <div class="card-sub">Cost 10 · 1024 iterasi · salt acak</div>
+            </div>
+            <div class="card">
+                <div class="card-icon">🪙</div>
+                <div class="card-label">Algoritma Token Sesi</div>
+                <div class="card-value purple">SHA-256 Manual</div>
+                <div class="card-sub">256-bit · tersimpan di database</div>
+            </div>
+        </div>
+
+        <div class="card token-card">
+            <div class="card-label">Token Sesi (SHA-256)</div>
+            <div class="token-display">{{ session_token }}</div>
+            <div class="card-sub" style="margin-top:0.5rem;">Dibuat dari SHA-256(username + waktu login + secret key) · Tersimpan permanen di database</div>
+        </div>
+
+        <div class="section-title">Coba Hashing Sendiri</div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-label" style="margin-bottom:0.85rem;">Demo SHA-256 Manual</div>
+                <div class="demo-row">
+                    <input type="text" class="demo-input" id="sha256Input" placeholder="Ketik teks...">
+                    <button class="btn-demo btn-sha" onclick="demoSHA256()">Hash</button>
+                </div>
+                <div class="hash-result">
+                    <div class="hash-hex" id="sha256Output"><span class="hash-placeholder">Hasil hash akan tampil di sini...</span></div>
+                </div>
+                <div class="steps" id="sha256Steps" style="display:none;">
+                    <div class="step"><div class="step-num">1</div><div><div class="step-label">Padding</div><div class="step-val" id="step1"></div></div></div>
+                    <div class="step"><div class="step-num">2</div><div><div class="step-label">Message Schedule</div><div class="step-val">64 word W[0..63] dibuat dari 16 word pertama</div></div></div>
+                    <div class="step"><div class="step-num">3</div><div><div class="step-label">Compression</div><div class="step-val">64 putaran fungsi kompresi dengan konstanta K</div></div></div>
+                    <div class="step"><div class="step-num">4</div><div><div class="step-label">Digest</div><div class="step-val" id="step4"></div></div></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-label" style="margin-bottom:0.85rem;">Demo Bcrypt Manual</div>
+                <div class="demo-row">
+                    <input type="text" class="demo-input" id="bcryptInput" placeholder="Ketik password...">
+                    <button class="btn-demo btn-bcrypt" onclick="demoBcrypt()">Hash</button>
+                </div>
+                <div class="slider-row">
+                    <span class="slider-label">Cost Factor:</span>
+                    <input type="range" id="costSlider" min="4" max="6" value="4" step="1" oninput="updateCost(this.value)">
+                    <span class="slider-val" id="costLabel">4 → 16 iterasi</span>
+                </div>
+                <div class="hash-result">
+                    <div class="hash-hex purple" id="bcryptOutput"><span class="hash-placeholder">Hasil hash akan tampil di sini...</span></div>
+                </div>
+                <div class="steps" id="bcryptSteps" style="display:none;">
+                    <div class="step"><div class="step-num purple">1</div><div><div class="step-label">Salt</div><div class="step-val" id="bcrypt-step1"></div></div></div>
+                    <div class="step"><div class="step-num purple">2</div><div><div class="step-label">EksBlowfish Setup</div><div class="step-val">Inisialisasi cipher Blowfish dengan password + salt</div></div></div>
+                    <div class="step"><div class="step-num purple">3</div><div><div class="step-label">Iterasi</div><div class="step-val" id="bcrypt-step3"></div></div></div>
+                    <div class="step"><div class="step-num purple">4</div><div><div class="step-label">Format Output</div><div class="step-val" id="bcrypt-step4"></div></div></div>
+                    <div class="step"><div class="step-num purple">⏱</div><div><div class="step-label">Waktu Hashing</div><div class="step-val" id="bcrypt-time"></div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Status Keamanan Sistem</div>
+        <div class="card">
+            <div class="status-list">
+                <div class="status-item"><span>Penyimpanan password</span><span class="badge badge-blue">Hash Bcrypt</span></div>
+                <div class="status-item"><span>Salt otomatis</span><span class="badge badge-green">Aktif · 16 byte acak tiap registrasi</span></div>
+                <div class="status-item"><span>Adaptive cost factor</span><span class="badge badge-blue">Cost 10 · 1024 iterasi</span></div>
+                <div class="status-item"><span>Session token</span><span class="badge badge-purple">SHA-256 · 256-bit · tersimpan permanen</span></div>
+                <div class="status-item"><span>Proteksi brute force</span><span class="badge badge-green">Maks. 5 percobaan · Kunci 5 menit</span></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function updateCost(val) { document.getElementById('costLabel').textContent = `${val} → ${Math.pow(2,parseInt(val))} iterasi`; }
+        async function demoSHA256() {
+            const input = document.getElementById('sha256Input').value.trim();
+            if (!input) return;
+            const out = document.getElementById('sha256Output');
+            out.className = 'hash-hex loading'; out.textContent = 'Menghitung SHA-256...';
+            try {
+                const res = await fetch('/api/demo/sha256', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text:input}) });
+                const data = await res.json();
+                out.className = 'hash-hex'; out.textContent = '';
+                for (let i = 0; i < data.hash.length; i++) { await new Promise(r => setTimeout(r,10)); out.textContent = data.hash.slice(0,i+1); }
+                document.getElementById('sha256Steps').style.display = 'flex';
+                document.getElementById('step1').textContent = `Input ${input.length} byte → dipadding ke ${Math.ceil((input.length+9)/64)*64} byte`;
+                document.getElementById('step4').textContent = `${data.length_bits}-bit digest · ${data.hash.length} karakter hexadecimal`;
+            } catch(e) { out.className = 'hash-hex'; out.textContent = 'Terjadi kesalahan.'; }
+        }
+        async function demoBcrypt() {
+            const input = document.getElementById('bcryptInput').value.trim();
+            if (!input) return;
+            const cost = parseInt(document.getElementById('costSlider').value);
+            const out = document.getElementById('bcryptOutput');
+            out.className = 'hash-hex purple loading'; out.textContent = `Menghitung Bcrypt (cost ${cost})...`;
+            try {
+                const res = await fetch('/api/demo/bcrypt', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password:input, cost}) });
+                const data = await res.json();
+                out.className = 'hash-hex purple'; out.textContent = data.hash;
+                document.getElementById('bcryptSteps').style.display = 'flex';
+                document.getElementById('bcrypt-step1').textContent = `Salt: ${data.components.salt}`;
+                document.getElementById('bcrypt-step3').textContent = `2^${data.components.cost_factor} = ${Math.pow(2,parseInt(data.components.cost_factor))} iterasi`;
+                document.getElementById('bcrypt-step4').textContent = `$2b$${data.components.cost_factor}$<22 karakter salt><31 karakter hash>`;
+                document.getElementById('bcrypt-time').textContent = `${data.elapsed_seconds} detik`;
+            } catch(e) { out.className = 'hash-hex purple'; out.textContent = 'Terjadi kesalahan.'; }
+        }
+        async function logout() { await fetch('/api/logout',{method:'POST'}); window.location.href='/login'; }
+        let debounce;
+        document.getElementById('sha256Input').addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(demoSHA256, 700); });
+    </script>
+</body>
+</html>
